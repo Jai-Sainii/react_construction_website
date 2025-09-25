@@ -10,7 +10,7 @@ const AdminDashboard = () => {
   const [team, setTeam] = useState([]);
   const [contacts, setContacts] = useState([]);
 
-  // Fetch data from backend
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -18,7 +18,7 @@ const AdminDashboard = () => {
           api.get('/services'),
           api.get('/projects'),
           api.get('/team'),
-          api.get('/contacts'),
+          api.get('/contact'),
         ]);
 
         setServices(servicesRes.data);

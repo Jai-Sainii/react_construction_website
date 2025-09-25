@@ -1,16 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
-import { useData } from '../../context/DataContext';
+import api from "../../api.js"
 
 const AdminServices = () => {
-  const { services, addService, updateService, deleteService } = useData();
+  const [services, setServices] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingService, setEditingService] = useState(null);
-  
+
   const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm();
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const res = await api.get('/services');
+        setServices(res.data);
+      } catch (err) {
+        toast.error('Failed to fetch services');
+        console.error(err);
+      }
+    };
+    fetchServices();
+  }, []);
 
   const onSubmit = async (data) => {
     try {
@@ -20,21 +33,26 @@ const AdminServices = () => {
       };
 
       if (editingService) {
-        updateService(editingService, formattedData);
+        // Update service
+        const res = await api.put(`/services/${editingService}`, formattedData);
+        setServices(prev => prev.map(s => s._id === editingService ? res.data : s));
         toast.success('Service updated successfully!');
       } else {
-        addService(formattedData);
+        // Add new service
+        const res = await api.post('/services', formattedData);
+        setServices(prev => [res.data, ...prev]);
         toast.success('Service added successfully!');
       }
-      
+
       handleCloseForm();
-    } catch (error) {
+    } catch (err) {
       toast.error('Failed to save service');
+      console.error(err);
     }
   };
 
   const handleEdit = (service) => {
-    setEditingService(service.id);
+    setEditingService(service._id);
     setValue('title', service.title);
     setValue('description', service.description);
     setValue('icon', service.icon);
@@ -43,10 +61,16 @@ const AdminServices = () => {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this service?')) {
-      deleteService(id);
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this service?')) return;
+
+    try {
+      await api.delete(`/services/${id}`);
+      setServices(prev => prev.filter(s => s._id !== id));
       toast.success('Service deleted successfully!');
+    } catch (err) {
+      toast.error('Failed to delete service');
+      console.error(err);
     }
   };
 
@@ -76,7 +100,7 @@ const AdminServices = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {services.map((service) => (
           <motion.div
-            key={service.id}
+            key={service._id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -94,21 +118,19 @@ const AdminServices = () => {
                   <Edit className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => handleDelete(service.id)}
+                  onClick={() => handleDelete(service._id)}
                   className="p-2 text-gray-600 hover:text-red-600 transition-colors"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
             </div>
-            
+
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               {service.title}
             </h3>
             <p className="text-gray-600 mb-4">{service.description}</p>
-            <div className="text-orange-500 font-bold text-lg mb-4">
-              {service.price}
-            </div>
+            <div className="text-orange-500 font-bold text-lg mb-4">{service.price}</div>
             <ul className="space-y-1">
               {service.features.map((feature, index) => (
                 <li key={index} className="text-sm text-gray-600">
@@ -152,9 +174,7 @@ const AdminServices = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   placeholder="Service title"
                 />
-                {errors.title && (
-                  <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
-                )}
+                {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
               </div>
 
               <div>
@@ -167,15 +187,11 @@ const AdminServices = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   placeholder="Service description"
                 />
-                {errors.description && (
-                  <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
-                )}
+                {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Icon
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Icon</label>
                 <input
                   type="text"
                   {...register('icon')}
@@ -185,24 +201,18 @@ const AdminServices = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Price *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Price *</label>
                 <input
                   type="text"
                   {...register('price', { required: 'Price is required' })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   placeholder="e.g., $150,000+"
                 />
-                {errors.price && (
-                  <p className="mt-1 text-sm text-red-600">{errors.price.message}</p>
-                )}
+                {errors.price && <p className="mt-1 text-sm text-red-600">{errors.price.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Features (one per line)
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Features (one per line)</label>
                 <textarea
                   {...register('features')}
                   rows={4}
