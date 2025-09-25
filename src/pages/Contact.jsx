@@ -31,17 +31,17 @@ const Contact = () => {
     {
       icon: MapPin,
       title: 'Address',
-      details: '123 Construction Ave, City, State 12345'
+      details: 'Sikar( Rajasthan ), India'
     },
     {
       icon: Phone,
       title: 'Phone',
-      details: '+1 (555) 123-4567'
+      details: '+91 93________'
     },
     {
       icon: Mail,
       title: 'Email',
-      details: 'info@buildcraft.com'
+      details: 'builderdelhi@gmail.com'
     },
     {
       icon: Clock,

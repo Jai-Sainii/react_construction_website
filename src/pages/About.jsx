@@ -4,6 +4,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Award, Users, Clock, Target, Mail, Linkedin } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { useNavigate } from "react-router-dom";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,6 +12,7 @@ const About = () => {
   const { team } = useData();
   const teamRef = useRef();
   const valuesRef = useRef();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (teamRef.current) {
@@ -74,6 +76,10 @@ const About = () => {
       description: 'Delivering projects on time and within budget'
     }
   ];
+
+  const handleClick = () => {
+    navigate("/contact"); 
+  };
 
   return (
     <div className="min-h-screen pt-20">
@@ -272,6 +278,7 @@ const About = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={handleClick}
               className="bg-white text-orange-500 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors duration-300"
             >
               View Open Positions

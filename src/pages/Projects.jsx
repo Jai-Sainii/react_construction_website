@@ -4,6 +4,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Calendar, User, Filter } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { useNavigate } from "react-router-dom";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -12,6 +13,7 @@ const Projects = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [filteredProjects, setFilteredProjects] = useState(projects);
   const projectsRef = useRef();
+  const navigate = useNavigate();
 
   const categories = ['All', 'Residential', 'Commercial', 'Infrastructure'];
 
@@ -43,6 +45,10 @@ const Projects = () => {
       );
     }
   }, [filteredProjects]);
+
+  const handleClick = () => {
+    navigate("/contact");
+  }
 
   return (
     <div className="min-h-screen pt-20">
@@ -172,13 +178,14 @@ const Projects = () => {
             <p className="text-xl mb-8 max-w-2xl mx-auto">
               Let's discuss how we can bring your construction vision to life with our expertise and dedication
             </p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-white text-orange-500 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors duration-300"
-            >
-              Get Started Today
-            </motion.button>
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleClick}
+                className="bg-white text-orange-500 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors duration-300"
+              >
+                Get Started Today
+              </motion.button>
           </motion.div>
         </div>
       </section>
