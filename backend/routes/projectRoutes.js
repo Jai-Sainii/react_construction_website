@@ -10,8 +10,8 @@ import { protect } from "../middlewares/authMiddleware.js";
 const router = express.Router();
 
 router.get("/", getProjects);           
-router.post("/", protect, addProject);  
-router.put("/:id", protect, updateProject);  
-router.delete("/:id", protect, deleteProject); 
+router.post("/", addProject);  
+router.put("/:id", updateProject);  
+router.delete("/:id", deleteProject); 
 
 export default router;

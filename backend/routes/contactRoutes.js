@@ -10,6 +10,6 @@ const router = express.Router();
 
 router.get("/", getContacts);     
 router.post("/", addContact);              
-router.delete("/:id", protect, deleteContact);
+router.delete("/:id", deleteContact);
 
 export default router;
