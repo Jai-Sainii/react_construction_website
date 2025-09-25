@@ -1,19 +1,33 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Award, Users, Clock, Target, Mail, Linkedin } from 'lucide-react';
-import { useData } from '../context/DataContext';
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
-  const { team } = useData();
+  const [team, setTeam] = useState([]);
   const teamRef = useRef();
   const valuesRef = useRef();
   const navigate = useNavigate();
 
+  // Fetch team members from backend
+  useEffect(() => {
+    const fetchTeam = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/team'); // replace with your backend URL
+        setTeam(response.data);
+      } catch (error) {
+        console.error('Error fetching team members:', error);
+      }
+    };
+    fetchTeam();
+  }, []);
+
+  // GSAP animations
   useEffect(() => {
     if (teamRef.current) {
       gsap.fromTo(
@@ -52,7 +66,7 @@ const About = () => {
         }
       );
     }
-  }, []);
+  }, [team]); // re-run animation when team data updates
 
   const values = [
     {
@@ -206,56 +220,58 @@ const About = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {team.map((member, index) => (
-              <motion.div
-                key={member.id}
-                className="team-card bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300"
-                whileHover={{ y: -10 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="relative h-64 overflow-hidden">
-                  <img
-                    src={member.image}
-                    alt={member.name}
-                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                  <div className="absolute bottom-4 left-4 text-white">
-                    <h3 className="text-xl font-semibold">{member.name}</h3>
-                    <p className="text-gray-200">{member.position}</p>
-                  </div>
-                </div>
-                
-                <div className="p-6">
-                  <p className="text-gray-600 mb-4 leading-relaxed">
-                    {member.bio}
-                  </p>
-                  
-                  <div className="mb-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">Skills:</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {member.skills.map((skill, skillIndex) => (
-                        <span
-                          key={skillIndex}
-                          className="bg-orange-100 text-orange-600 px-2 py-1 rounded-full text-sm"
-                        >
-                          {skill}
-                        </span>
-                      ))}
+            {team.length === 0 ? (
+              <p className="text-center text-gray-500 col-span-full">Loading team members...</p>
+            ) : (
+              team.map((member) => (
+                <motion.div
+                  key={member._id}
+                  className="team-card bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300"
+                  whileHover={{ y: -10 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="relative h-64 overflow-hidden">
+                    <img
+                      src={member.image}
+                      alt={member.name}
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                    <div className="absolute bottom-4 left-4 text-white">
+                      <h3 className="text-xl font-semibold">{member.name}</h3>
+                      <p className="text-gray-200">{member.position}</p>
                     </div>
                   </div>
                   
-                  <div className="flex space-x-3">
-                    <button className="text-gray-400 hover:text-orange-500 transition-colors">
-                      <Mail className="h-5 w-5" />
-                    </button>
-                    <button className="text-gray-400 hover:text-orange-500 transition-colors">
-                      <Linkedin className="h-5 w-5" />
-                    </button>
+                  <div className="p-6">
+                    <p className="text-gray-600 mb-4 leading-relaxed">{member.bio}</p>
+                    
+                    <div className="mb-4">
+                      <h4 className="font-semibold text-gray-900 mb-2">Skills:</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {member.skills.map((skill, i) => (
+                          <span
+                            key={i}
+                            className="bg-orange-100 text-orange-600 px-2 py-1 rounded-full text-sm"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="flex space-x-3">
+                      <button className="text-gray-400 hover:text-orange-500 transition-colors">
+                        <Mail className="h-5 w-5" />
+                      </button>
+                      <button className="text-gray-400 hover:text-orange-500 transition-colors">
+                        <Linkedin className="h-5 w-5" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))
+            )}
           </div>
         </div>
       </section>

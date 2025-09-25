@@ -3,25 +3,41 @@ import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
-import { useData } from '../context/DataContext';
 
 const Contact = () => {
-  const { addContact } = useData();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset
+  } = useForm();
+
+  // Form submission handler
   const onSubmit = async (data) => {
     setIsSubmitting(true);
+
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      addContact(data);
-      toast.success('Message sent successfully!');
-      reset();
+      const res = await fetch('http://localhost:5000/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        toast.success(result.message || 'Message sent successfully!');
+        reset();
+      } else {
+        toast.error(result.message || 'Failed to send message.');
+      }
     } catch (error) {
-      toast.error('Failed to send message. Please try again.');
+      console.error('Error sending message:', error);
+      toast.error('Something went wrong. Please try again later.');
     } finally {
       setIsSubmitting(false);
     }
@@ -31,23 +47,23 @@ const Contact = () => {
     {
       icon: MapPin,
       title: 'Address',
-      details: 'Sikar( Rajasthan ), India'
+      details: 'Sikar, Rajasthan, India',
     },
     {
       icon: Phone,
       title: 'Phone',
-      details: '+91 93________'
+      details: '+91 93________',
     },
     {
       icon: Mail,
       title: 'Email',
-      details: 'builderdelhi@gmail.com'
+      details: 'builderdelhi@gmail.com',
     },
     {
       icon: Clock,
       title: 'Hours',
-      details: 'Mon-Fri: 8AM-6PM'
-    }
+      details: 'Mon-Fri: 8AM - 6PM',
+    },
   ];
 
   return (
@@ -86,8 +102,9 @@ const Contact = () => {
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 Send us a Message
               </h2>
-              
+
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                {/* Name */}
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                     Name *
@@ -103,7 +120,8 @@ const Contact = () => {
                     <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
                   )}
                 </div>
-                
+
+                {/* Email */}
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                     Email *
@@ -115,8 +133,8 @@ const Contact = () => {
                       required: 'Email is required',
                       pattern: {
                         value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                        message: 'Invalid email address'
-                      }
+                        message: 'Invalid email address',
+                      },
                     })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                     placeholder="your.email@example.com"
@@ -125,7 +143,8 @@ const Contact = () => {
                     <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
                   )}
                 </div>
-                
+
+                {/* Subject */}
                 <div>
                   <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
                     Subject *
@@ -141,7 +160,8 @@ const Contact = () => {
                     <p className="mt-1 text-sm text-red-600">{errors.subject.message}</p>
                   )}
                 </div>
-                
+
+                {/* Message */}
                 <div>
                   <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
                     Message *
@@ -157,7 +177,8 @@ const Contact = () => {
                     <p className="mt-1 text-sm text-red-600">{errors.message.message}</p>
                   )}
                 </div>
-                
+
+                {/* Submit Button */}
                 <motion.button
                   type="submit"
                   disabled={isSubmitting}
@@ -170,7 +191,7 @@ const Contact = () => {
                 </motion.button>
               </form>
             </motion.div>
-            
+
             {/* Contact Info */}
             <motion.div
               initial={{ opacity: 0, x: 50 }}
@@ -187,7 +208,7 @@ const Contact = () => {
                   We're here to help with all your construction needs. Reach out to us through any of the following channels.
                 </p>
               </div>
-              
+
               <div className="space-y-6">
                 {contactInfo.map((info, index) => {
                   const Icon = info.icon;
@@ -213,7 +234,7 @@ const Contact = () => {
                   );
                 })}
               </div>
-              
+
               {/* Map Placeholder */}
               <div className="bg-gray-300 rounded-lg h-64 flex items-center justify-center">
                 <div className="text-center">

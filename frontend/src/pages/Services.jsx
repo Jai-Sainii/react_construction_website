@@ -1,17 +1,31 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { CheckCircle, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useData } from '../context/DataContext';
+import axios from 'axios';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Services = () => {
-  const { services } = useData();
+  const [services, setServices] = useState([]);
   const servicesRef = useRef();
 
+  // Fetch services from backend
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/services'); // Replace with your backend URL
+        setServices(response.data);
+      } catch (error) {
+        console.error('Error fetching services:', error);
+      }
+    };
+    fetchServices();
+  }, []);
+
+  // GSAP animations
   useEffect(() => {
     if (servicesRef.current) {
       gsap.fromTo(
@@ -31,7 +45,7 @@ const Services = () => {
         }
       );
     }
-  }, []);
+  }, [services]); // re-run animation when services data updates
 
   return (
     <div className="min-h-screen pt-20">
@@ -58,49 +72,55 @@ const Services = () => {
       <section ref={servicesRef} className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service, index) => (
-              <motion.div
-                key={service.id}
-                className="service-card bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300"
-                whileHover={{ y: -10, scale: 1.02 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="p-8">
-                  <div className="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center mb-6">
-                    <div className="w-8 h-8 bg-orange-500 rounded" />
+            {services.length === 0 ? (
+              <p className="text-center text-gray-500 col-span-full">
+                Loading services...
+              </p>
+            ) : (
+              services.map((service) => (
+                <motion.div
+                  key={service._id} // MongoDB id
+                  className="service-card bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300"
+                  whileHover={{ y: -10, scale: 1.02 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="p-8">
+                    <div className="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center mb-6">
+                      <div className="w-8 h-8 bg-orange-500 rounded" />
+                    </div>
+
+                    <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+                      {service.title}
+                    </h3>
+
+                    <p className="text-gray-600 mb-6 leading-relaxed">
+                      {service.description}
+                    </p>
+
+                    <div className="text-orange-500 font-bold text-2xl mb-6">
+                      {service.price}
+                    </div>
+
+                    <ul className="space-y-3 mb-8">
+                      {service.features.map((feature, i) => (
+                        <li key={i} className="flex items-center space-x-3">
+                          <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                          <span className="text-gray-700">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <Link
+                      to="/contact"
+                      className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors duration-300 inline-flex items-center justify-center space-x-2"
+                    >
+                      <span>Get Quote</span>
+                      <ArrowRight className="h-5 w-5" />
+                    </Link>
                   </div>
-                  
-                  <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-                    {service.title}
-                  </h3>
-                  
-                  <p className="text-gray-600 mb-6 leading-relaxed">
-                    {service.description}
-                  </p>
-                  
-                  <div className="text-orange-500 font-bold text-2xl mb-6">
-                    {service.price}
-                  </div>
-                  
-                  <ul className="space-y-3 mb-8">
-                    {service.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
-                        <span className="text-gray-700">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  
-                  <Link
-                    to="/contact"
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors duration-300 inline-flex items-center justify-center space-x-2"
-                  >
-                    <span>Get Quote</span>
-                    <ArrowRight className="h-5 w-5" />
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -116,7 +136,7 @@ const Services = () => {
               We deliver exceptional results through expertise, innovation, and unwavering commitment
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               {
